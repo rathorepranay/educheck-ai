@@ -21,7 +21,7 @@ public class Assignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "classroom-id", nullable = false)
+    @Column(name = "classroom_id", nullable = false)
     private  Long classroomId;
 
     @Column(nullable = false, length = 150)
@@ -30,7 +30,7 @@ public class Assignment {
     @Column(length = 500)
     private  String description;
 
-    @Column(name = "due-date", nullable = false)
+    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
     private Instant createdAt;
 
