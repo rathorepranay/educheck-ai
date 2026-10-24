@@ -8,9 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ClassroomJwtInterceptor jwtInterceptor;
+    private final ClassroomRoleInterceptor roleInterceptor;
 
-    public WebMvcConfig(ClassroomJwtInterceptor jwtInterceptor) {
+    public WebMvcConfig(
+            ClassroomJwtInterceptor jwtInterceptor,
+            ClassroomRoleInterceptor roleInterceptor) {
         this.jwtInterceptor = jwtInterceptor;
+        this.roleInterceptor = roleInterceptor;
     }
 
     @Override
@@ -21,5 +25,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                         "/actuator/health",
                         "/actuator/health/**"
                 );
+
+        registry.addInterceptor(roleInterceptor)
+                .addPathPatterns("/classrooms/**");
     }
 }
