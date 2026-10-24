@@ -18,10 +18,11 @@ public class ClassroomService {
 
     private final ClassroomRepository classroomRepository;
 
-    public ClassroomResponseDto createClassroom(CreateClassroomDto dto) {
+    public ClassroomResponseDto createClassroom(CreateClassroomDto dto, String email) {
         Classroom classroom = new Classroom();
         classroom.setName(dto.name());
         classroom.setDescription(dto.description());
+        classroom.setCreatedBy(email);
 
         return toDto(classroomRepository.save(classroom));
     }
@@ -40,8 +41,10 @@ public class ClassroomService {
     }
 
     public ClassroomResponseDto updateClassroom(
-            Long id, CreateClassroomDto dto) {
-        Classroom classroom = findClassroom(id);
+            Long id, CreateClassroomDto dto, String email, String role) {
+
+        Classroom classroom = findClassroomForTeacherOrAdmin(id, email, role);
+
         classroom.setName(dto.name());
         classroom.setDescription(dto.description());
 
@@ -65,5 +68,37 @@ public class ClassroomService {
                 classroom.getDescription(),
                 classroom.getCreatedAt()
         );
+    }
+    private Classroom findClassroomForTeacherOrAdmin(
+            Long id, String email, String role) {
+
+        Classroom classroom = findClassroom(id);
+
+        if ("ADMIN".equals(role)) {
+            return classroom;
+        }
+
+        if (!"TEACHER".equals(role)
+                || classroom.getCreatedBy() == null
+                || !classroom.getCreatedBy().equalsIgnoreCase(email)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.FORBIDDEN,
+                    "You are not allowed to modify this classroom"
+            );
+        }
+
+        return classroom;
+    }
+    @Transactional(readOnly = true)
+    public boolean isOwner(Long id, String email, String role) {
+        Classroom classroom = findClassroom(id);
+
+        if ("ADMIN".equals(role)) {
+            return true;
+        }
+
+        return "TEACHER".equals(role)
+                && classroom.getCreatedBy() != null
+                && classroom.getCreatedBy().equalsIgnoreCase(email);
     }
 }

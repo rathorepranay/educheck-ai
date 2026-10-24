@@ -29,6 +29,9 @@ public class Classroom {
     @Column(length = 500)
     private String description;
 
+    @Column(name = "created_by", length = 255)
+    private String createdBy;
+
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
 

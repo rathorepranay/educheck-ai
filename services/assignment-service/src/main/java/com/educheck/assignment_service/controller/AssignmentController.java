@@ -4,6 +4,7 @@ package com.educheck.assignment_service.controller;
 import com.educheck.assignment_service.dto.AssignmentResponseDto;
 import com.educheck.assignment_service.dto.CreateAssignmentDto;
 import com.educheck.assignment_service.service.AssignmentService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,15 @@ public class AssignmentController {
 
     @PostMapping
     public ResponseEntity<AssignmentResponseDto> createAssignment(
-            @Valid @RequestBody CreateAssignmentDto dto) {
+            @Valid @RequestBody CreateAssignmentDto dto,
+            HttpServletRequest request) {
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(assignmentService.createAssignment(dto));
+        String email = (String) request.getAttribute("authenticatedEmail");
+        String role = (String) request.getAttribute("authenticatedRole");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                assignmentService.createAssignment(dto, email, role)
+        );
     }
 
     @GetMapping
@@ -54,10 +59,15 @@ public class AssignmentController {
     @PutMapping("/{id}")
     public ResponseEntity<AssignmentResponseDto> updateAssignment(
             @PathVariable Long id,
-            @Valid @RequestBody CreateAssignmentDto dto) {
+            @Valid @RequestBody CreateAssignmentDto dto,
+            HttpServletRequest request) {
+
+        String email = (String) request.getAttribute("authenticatedEmail");
+        String role = (String) request.getAttribute("authenticatedRole");
 
         return ResponseEntity.ok(
-                assignmentService.updateAssignment(id, dto));
+                assignmentService.updateAssignment(id, dto, email, role)
+        );
     }
 
     @DeleteMapping("/{id}")

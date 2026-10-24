@@ -30,8 +30,16 @@ public class Assignment {
     @Column(length = 500)
     private  String description;
 
+
+
+
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
+
+    @Column(name = "created_by", length = 255)
+    private String createdBy;
+
+
     private Instant createdAt;
 
     @PrePersist

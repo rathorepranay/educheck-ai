@@ -32,14 +32,21 @@ public class ClassroomClient {
                             RequestContextHolder.getRequestAttributes();
 
             String correlationId = null;
+            String authorizationHeader = null;
 
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
                 correlationId = request.getHeader("X-Correlation-ID");
+                authorizationHeader = request.getHeader("Authorization");
             }
 
             var requestSpec = restClient.get()
                     .uri("/classrooms/{id}", classroomId);
+
+            if (authorizationHeader != null
+                    && !authorizationHeader.isBlank()) {
+                requestSpec.header("Authorization", authorizationHeader);
+            }
 
             if (correlationId != null && !correlationId.isBlank()) {
                 requestSpec.header("X-Correlation-ID", correlationId);
@@ -63,6 +70,46 @@ public class ClassroomClient {
 
             throw new IllegalStateException(
                     "Classroom Service returned HTTP "
+                            + ex.getStatusCode().value(), ex);
+        }
+    }
+    public boolean isClassroomOwner(Long classroomId) {
+        try {
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes)
+                            RequestContextHolder.getRequestAttributes();
+
+            String correlationId = null;
+            String authorizationHeader = null;
+
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                correlationId = request.getHeader("X-Correlation-ID");
+                authorizationHeader = request.getHeader("Authorization");
+            }
+
+            var requestSpec = restClient.get()
+                    .uri("/classrooms/{id}/ownership", classroomId);
+
+            if (authorizationHeader != null
+                    && !authorizationHeader.isBlank()) {
+                requestSpec.header("Authorization", authorizationHeader);
+            }
+
+            if (correlationId != null && !correlationId.isBlank()) {
+                requestSpec.header("X-Correlation-ID", correlationId);
+            }
+
+            return Boolean.TRUE.equals(
+                    requestSpec.retrieve()
+                            .body(new org.springframework.core.ParameterizedTypeReference<
+                                    java.util.Map<String, Boolean>>() {})
+                            .get("owner")
+            );
+
+        } catch (RestClientResponseException ex) {
+            throw new IllegalStateException(
+                    "Classroom ownership check failed with HTTP "
                             + ex.getStatusCode().value(), ex);
         }
     }
